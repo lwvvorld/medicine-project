@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SHYAM JI MEDICOSE (PARK) — Invoice + Inventory (Units/Pack)</title>
+  <style>
+    :root{--accent:#064e3b;--muted:#666}
+    body{font-family:Inter, system-ui, Arial; margin:20px; background:#f6f7fb;color:#111; font-size:14px}
+    .container{max-width:1100px;margin:0 auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 6px 20px rgba(6,78,59,0.06)}
+    header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #eee;padding-bottom:14px;margin-bottom:14px}
+    h1{margin:4px 0 0 0;font-size:20px;color:var(--accent);text-align:center}
+    .addr{text-align:center;font-size:14px;color:var(--muted)}
+    .dl-info{font-size:15px;color:#111;margin-top:4px;font-weight:bold}
+    .top-block{flex:1;text-align:center}
+    .left-block{flex:1;text-align:left}
+    .right-block{flex:1;text-align:right;font-size:14px;color:#111}
+    .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px}
+    .meta label{font-size:13px;color:var(--muted)}
+    input[type=text], input[type=number], input[type=date], select, textarea{padding:4px 6px;border:1px solid #ddd;border-radius:6px;font-size:14px}
+    .flex{display:flex;gap:14px;align-items:center}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #e6e6e6;padding:6px;font-size:13px;text-align:left}
+    th{background:#fafafa}
+    .right{text-align:right}
+    .controls{display:flex;gap:10px;margin-top:12px}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+    button.secondary{background:#e5e7eb;color:#111}
+    .delete-btn{cursor:pointer;color:#b91c1c;font-weight:bold;border:none;background:none;font-size:16px}
+    .totals{margin-top:14px;display:flex;justify-content:flex-end;align-items:flex-start;gap:14px;flex-wrap:wrap}
+    .totals table{margin-left:auto}
+    .submit-area{margin-top:8px;display:flex;justify-content:flex-start}
+    .signature{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+    .note{font-size:13px;color:var(--muted)}
+    .pos-box{margin-top:14px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px}
+    .pos-box h3{margin:0 0 6px 0;font-size:15px;color:var(--accent)}
+    .pos-box input{margin-bottom:6px;width:100%}
+    .disclaimer{font-size:13px;color:#b91c1c;margin-bottom:6px}
+    .search-panel{margin-top:14px;padding:10px;border:1px dashed #ddd;border-radius:8px;background:#fff}
+    .small{font-size:12px;color:#666}
+    .inventory-panel{margin-top:18px;padding:12px;border:1px solid #e6f0ea;background:#f8fffa;border-radius:8px}
+    .inline{display:inline-block}
+    .muted{color:var(--muted)}
+    .no-print{ /* keep display */ }
+    .editable-cell{border:none;background:transparent;padding:4px;width:100%}
+    #invoiceStatus { margin-left:6px; font-weight:bold; font-size:13px; vertical-align:middle; }
+    #invoiceStatus.exists { color: #b91c1c; }
+    #invoiceStatus.new { color: #065f46; }
+    .header-fields{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap}
+    .header-fields div{min-width:120px}
+    .compact-row{display:flex;gap:10px;align-items:center}
+    @media print{
+      body{background:#fff;margin:0;font-size:13px}
+      .container{box-shadow:none;border-radius:0;margin:0;height:auto;overflow:visible}
+      button, .no-print, .pos-box, .search-panel, .inventory-panel{display:none}
+      input, select{border:none}
+      .header-fields{justify-content:space-between}
+      @page{size:A4 portrait;margin:12mm}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="left-block">
+        <div class="dl-info"><strong>DL No:</strong> RLF20HR2023005275 , RLF21HR2023005279</div>
+        <div class="dl-info"><strong>Udyam No:</strong> UDYAM-HR-18-0059495</div>
+      </div>
+      <div class="top-block">
+        <h1>SHYAM JI MEDICOSE (PARK)</h1>
+        <div class="addr">NEAR PARK HOSP. MURTHAL ROAD, SONIPAT, HARYANA - PIN-131001</div>
+      </div>
+      <div class="right-block">
+        <div><strong>Mobile:</strong> 8398082806 , 9671051129</div>
+      </div>
+    </header>
+
+    <!-- META: Patient (formerly Customer), Address, Doctor all in one row -->
+    <div class="meta">
+      <div style="flex:1;min-width:220px">
+        <label>Patient Name</label><br>
+        <input id="patientName" type="text" placeholder="Patient Name" />
+      </div>
+
+      <div style="flex:1;min-width:260px">
+        <label>Address</label><br>
+        <input id="patientAddress" type="text" placeholder="Address (Village / City / Area)" />
+      </div>
+
+      <div style="min-width:200px">
+        <label>Doctor Name</label><br>
+        <input id="doctorName" type="text" placeholder="Doctor Name" />
+      </div>
+
+      <div>
+        <label>Mobile No.</label><br>
+        <input id="mobileNo" type="text" placeholder="Mobile No." />
+      </div>
+
+      <div>
+        <label>Invoice No.</label><br>
+        <span>INV-</span><input id="invoiceNo" type="text" placeholder="001" style="width:80px" />
+        <span id="invoiceStatus" class="new">New</span>
+      </div>
+
+      <div>
+        <label>Invoice Date</label><br>
+        <input id="sigDate" type="date" />
+      </div>
+    </div>
+
+    <div class="no-print" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="flex">
+        <button id="addRowBtn">+ Add Row</button>
+        <button id="clearBtn" class="secondary">Clear</button>
+        <button id="saveBtn">Save (to folder)</button>
+        <button id="pickDirBtn" class="secondary">Choose Folder</button>
+      </div>
+      <div class="flex" id="afterSubmitButtons" style="display:none">
+        <button id="shareBtn">Share on WhatsApp</button>
+        <button id="printBtn">Print / Save PDF</button>
+      </div>
+    </div>
+
+    <div class="search-panel no-print">
+      <strong>Search / Load saved invoices</strong> <span class="small muted">(Choose directory or upload JSON invoices)</span>
+      <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+        <label class="small">From</label>
+        <input type="date" id="searchFrom" />
+        <label class="small">To</label>
+        <input type="date" id="searchTo" />
+        <input type="text" id="searchName" placeholder="Patient name" />
+        <input type="text" id="searchMobile" placeholder="Mobile no" />
+        <button id="searchBtn">Search</button>
+        <input id="fileInput" type="file" multiple webkitdirectory directory style="display:none" />
+        <button id="uploadBtn" class="secondary">Upload Files</button>
+        <div id="searchResults" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+    <datalist id="productList"></datalist>
+
+    <table id="itemsTable">
+      <thead>
+        <tr>
+          <th>Sr.</th>
+          <th>Product Name / Packing</th>
+          <th style="width:60px;">HSN</th>
+          <th style="width:70px;">Batch No</th>
+          <th style="width:120px;">Expiry (MM/YYYY)</th>
+          <th style="width:60px;">MRP (per pack)</th>
+          <th style="width:60px;">Rate (per pack)</th>
+          <th style="width:60px;">Units/Pack</th>
+          <th style="width:40px;">Qty (units)</th>
+          <th style="width:70px;">GST %</th>
+          <th>Amount</th>
+          <th class="no-print">Del</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="totals">
+      <table>
+        <tr>
+          <th>Subtotal (excl. GST)</th>
+          <td class="right" id="subtotal">0.00</td>
+        </tr>
+        <tr>
+          <th>Total GST</th>
+          <td class="right" id="totalGst">0.00</td>
+        </tr>
+        <tr>
+          <th>Grand Total (incl. GST)</th>
+          <td class="right" id="grandTotal">0.00</td>
+        </tr>
+        <tr>
+          <th>Final Total (after discount)</th>
+          <td class="right" id="finalTotal">0.00</td>
+        </tr>
+      </table>
+
+      <!-- DISCOUNT below totals -->
+      <div style="min-width:260px;">
+        <label style="display:block;font-weight:bold;margin-bottom:6px">Discount (%)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="discountPct" type="number" min="0" step="0.01" value="0" style="width:120px;padding:6px" />
+          <div>Discount Amount: <strong id="discountAmount">0.00</strong></div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)"><label><input type="checkbox" id="pricesIncludeGst" checked /> Prices include GST</label></div>
+      </div>
+    </div>
+
+    <div class="submit-area no-print">
+      <button id="submitBtn" style="background:#2563eb">Submit</button>
+    </div>
+
+    <div class="signature">
+      <div>
+        <div class="disclaimer">Do Not Pay Without Authorised Printed Receipt. All Disputes Subject To SONEPAT Jurisdiction</div>
+        <div class="note">For any complaint or return contact: <strong>8398082806 , 9671051129</strong></div>
+        <div class="note">Patient: <strong id="patientDisplay">-</strong></div>
+        <div class="note">Address: <strong id="patientAddressDisplay">-</strong></div>
+        <div class="note">Doctor: <strong id="doctorDisplay">-</strong></div>
+      </div>
+      <div style="text-align:right">
+        <div style="height:60px">&nbsp;</div>
+        <div>___________________</div>
+        <div>Pharmacist Sign.</div>
+      </div>
+    </div>
+
+    <div id="afterSubmit" class="no-print" style="display:none; margin-top:10px">
+      <button id="shareBtn2">Share on WhatsApp</button>
+      <button id="printBtn2">Print / Save PDF</button>
+    </div>
+
+    <div class="pos-box no-print">
+      <h3>POS (Point of Sale)</h3>
+      <label>Cash Received:</label>
+      <input type="number" id="cashReceived" placeholder="Enter cash received" />
+      <div>Change to return: <strong id="changeReturn">0.00</strong></div>
+    </div>
+
+    <div class="inventory-panel no-print">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <h3 style="margin:0;color:var(--accent)">Inventory Management</h3>
+        <div style="display:flex;gap:8px;">
+          <button id="addInventoryBtn">+ Add Item</button>
+          <button id="exportInvBtn" class="secondary">Export Inventory</button>
+          <input id="invFileInput" type="file" accept=".json" style="display:none" />
+          <button id="importInvBtn" class="secondary">Import Inventory</button>
+        </div>
+      </div>
+
+      <table id="inventoryTable" style="margin-top:8px">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>HSN</th>
+            <th>Batch</th>
+            <th>Expiry</th>
+            <th>MRP (per pack)</th>
+            <th>Rate (per pack)</th>
+            <th>Units/Pack</th>
+            <th>Qty in Stock (packs × units = units)</th>
+            <th class="no-print">Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:14px;font-size:13px;color:var(--muted)">Invoice generated by <strong>SHYAM JI MEDICOSE (PARK)</strong></div>
+  </div>
+
+  <!-- Inventory modal -->
+  <div id="inventoryModal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center">
+    <div style="background:#fff;padding:16px;border-radius:8px;min-width:360px;box-shadow:0 6px 20px rgba(0,0,0,0.2)">
+      <h3 style="margin-top:0">Add / Edit Inventory Item</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <input id="inv_name" placeholder="Product name" />
+        <input id="inv_hsn" placeholder="HSN" />
+        <input id="inv_batch" placeholder="Batch" />
+        <input id="inv_expiry" placeholder="MM/YYYY" />
+        <input id="inv_mrp" type="number" step="0.01" placeholder="MRP per pack" />
+        <input id="inv_rate" type="number" step="0.01" placeholder="Rate per pack" />
+        <input id="inv_unitsPerPack" type="number" min="1" value="1" placeholder="Units per pack (e.g. 10)" />
+        <input id="inv_packs" type="number" min="0" value="0" placeholder="Packs (quantity of packs)" />
+        <input id="inv_gst" type="number" step="0.01" placeholder="GST %" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button id="invSaveBtn">Save</button>
+        <button id="invCancelBtn" class="secondary">Cancel</button>
+      </div>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">Note: "Packs" × "Units per pack" = total units stored in inventory. Invoice Qty is in units (e.g. tablets).</div>
+    </div>
+  </div>
+
+  <script>
+    // elements (updated IDs)
+    const tbody = document.querySelector('#itemsTable tbody')
+    const addRowBtn = document.getElementById('addRowBtn')
+    const clearBtn = document.getElementById('clearBtn')
+    const saveBtn = document.getElementById('saveBtn')
+    const pickDirBtn = document.getElementById('pickDirBtn')
+    const uploadBtn = document.getElementById('uploadBtn')
+    const fileInput = document.getElementById('fileInput')
+    const searchBtn = document.getElementById('searchBtn')
+    const searchResults = document.getElementById('searchResults')
+    const cashReceivedInput = document.getElementById('cashReceived')
+    const changeReturn = document.getElementById('changeReturn')
+    const submitBtn = document.getElementById('submitBtn')
+    const afterSubmitButtons = document.getElementById('afterSubmitButtons')
+    const shareBtn = document.getElementById('shareBtn')
+    const printBtn = document.getElementById('printBtn')
+    const shareBtn2 = document.getElementById('shareBtn2')
+    const printBtn2 = document.getElementById('printBtn2')
+    const invoiceNoInput = document.getElementById('invoiceNo')
+    const invoiceStatusSpan = document.getElementById('invoiceStatus')
+    const pricesIncludeGstChk = document.getElementById('pricesIncludeGst')
+    const sigDateInput = document.getElementById('sigDate')
+
+    const patientNameInput = document.getElementById('patientName')
+    const patientAddressInput = document.getElementById('patientAddress')
+    const doctorNameInput = document.getElementById('doctorName')
+    const mobileNoInput = document.getElementById('mobileNo')
+
+    const patientDisplay = document.getElementById('patientDisplay')
+    const patientAddressDisplay = document.getElementById('patientAddressDisplay')
+    const doctorDisplay = document.getElementById('doctorDisplay')
+
+    // inventory elements
+    const addInventoryBtn = document.getElementById('addInventoryBtn')
+    const inventoryModal = document.getElementById('inventoryModal')
+    const invSaveBtn = document.getElementById('invSaveBtn')
+    const invCancelBtn = document.getElementById('invCancelBtn')
+    const invFileInput = document.getElementById('invFileInput')
+    const importInvBtn = document.getElementById('importInvBtn')
+    const exportInvBtn = document.getElementById('exportInvBtn')
+    const productList = document.getElementById('productList')
+    const inventoryTableBody = document.querySelector('#inventoryTable tbody')
+
+    let directoryHandle = null
+    let invoiceSubmitted = false
+
+    function genId(){ return 'id'+Math.random().toString(36).slice(2,9) }
+
+    // inventory stores units (smallest unit)
+    let inventory = [
+  {id: genId(), name:"Paracetamol Strip", hsn:"300450", batch:"P001", expiry:"08/2026", mrp:210, rate:200, gst:0, unitsPerPack:10, qtyUnits:96000},
+  {id: genId(), name:"Cough Syrup 100ml", hsn:"300490", batch:"C002", expiry:"12/2025", mrp:85, rate:72, gst:12, unitsPerPack:1, qtyUnits:5760},
+  {id: genId(), name:"CAP-CAYLIX MAX", hsn:"3004", batch:"DBS-1555", expiry:"05/2027", mrp:310, rate:310, gst:0, unitsPerPack:10, qtyUnits:16000},
+  {id: genId(), name:"CLOPITEX-A 75 TAB", hsn:"3005", batch:"PBQGD03", expiry:"11/2026", mrp:95, rate:33, gst:12, unitsPerPack:1, qtyUnits:0},
+  {id: genId(), name:"LINAGLYS-5 TAB", hsn:"3004", batch:"I3754001", expiry:"12/2025", mrp:110, rate:11, gst:12, unitsPerPack:1, qtyUnits:0},
+  {id: genId(), name:"MENSTAROL 200ML(syrup)", hsn:"3004", batch:"LMST2403", expiry:"09/2027", mrp:176, rate:176, gst:12, unitsPerPack:2, qtyUnits:0},
+  {id: genId(), name:"AMLIP10 TAB", hsn:"3004", batch:"4C10140", expiry:"01/2027", mrp:61.04, rate:10.5, gst:18, unitsPerPack:10, qtyUnits:0},
+  {id: genId(), name:"TAB-TRIPMAX-PLUS", hsn:"3004", batch:"MTT250171", expiry:"12/2026", mrp:225, rate:225, gst:12, unitsPerPack:50, qtyUnits:0},
+  {id: genId(), name:"INJ- GMINE PLUS", hsn:"3004", batch:"14MB2CID", expiry:"11/2025", mrp:190, rate:190, gst:18, unitsPerPack:5, qtyUnits:0},
+  {id: genId(), name:"TAB-SPINO HEAL", hsn:"2106", batch:"TMY-337", expiry:"04/2027", mrp:381, rate:381, gst:18, unitsPerPack:50, qtyUnits:0},
+  {id: genId(), name:"CREDRID GEL 30GM", hsn:"3004", batch:"B2421B", expiry:"01/2026", mrp:110, rate:110, gst:12, unitsPerPack:5, qtyUnits:0},
+  {id: genId(), name:"TAB-CITIBEST-P", hsn:"3004", batch:"ADT24266A", expiry:"06/2026", mrp:818, rate:818, gst:0, unitsPerPack:10, qtyUnits:3200},
+  {id: genId(), name:"TAB-NITRONEED-SR", hsn:"3004", batch:"LGP01/298/16", expiry:"12/2026", mrp:126, rate:126, gst:0, unitsPerPack:10, qtyUnits:4000},
+  {id: genId(), name:"TAB-TELCOSURE-M25", hsn:"3004", batch:"LGN09/065/15", expiry:"08/2026", mrp:137, rate:137, gst:0, unitsPerPack:10, qtyUnits:4000},
+  {id: genId(), name:"INJ-MAGNEON 2ML (NEON)", hsn:"3004", batch:"70211", expiry:"12/2026", mrp:11.05, rate:11.05, gst:0, unitsPerPack:1, qtyUnits:2000},
+  {id: genId(), name:"TAB-MAGNETOR (STPL)", hsn:"3004", batch:"25B02", expiry:"12/2026", mrp:48.47, rate:48.47, gst:0, unitsPerPack:10, qtyUnits:500}
+]
+
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+    function refreshProductList(){
+      productList.innerHTML = ''
+      const uniqueNames = {}
+      inventory.forEach(it=>{
+        if(!uniqueNames[it.name]){
+          const opt = document.createElement('option')
+          opt.value = it.name
+          productList.appendChild(opt)
+          uniqueNames[it.name] = true
+        }
+      })
+    }
+
+    function renderInventory(){
+      inventoryTableBody.innerHTML = ''
+      inventory.forEach(it=>{
+        const packs = it.unitsPerPack ? ( (it.qtyUnits / it.unitsPerPack).toFixed(2) ) : it.qtyUnits
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          <td>${escapeHtml(it.name)}</td>
+          <td>${escapeHtml(it.hsn)}</td>
+          <td>${escapeHtml(it.batch)}</td>
+          <td>${escapeHtml(it.expiry)}</td>
+          <td class="right">${Number(it.mrp).toFixed(2)}</td>
+          <td class="right">${Number(it.rate).toFixed(2)}</td>
+          <td class="right">${Number(it.unitsPerPack)||1}</td>
+          <td class="right">${packs} packs ≈ ${Number(it.qtyUnits)} units</td>
+          <td class="no-print">
+            <button data-edit="${it.id}">Edit</button>
+            <button data-delete="${it.id}" class="secondary">Delete</button>
+          </td>
+        `
+        inventoryTableBody.appendChild(tr)
+      })
+      inventoryTableBody.querySelectorAll('button[data-edit]').forEach(b=>{
+        b.addEventListener('click', ()=> openInvModalForEdit(b.getAttribute('data-edit')))
+      })
+      inventoryTableBody.querySelectorAll('button[data-delete]').forEach(b=>{
+        b.addEventListener('click', ()=> {
+          const id = b.getAttribute('data-delete')
+          if(confirm('Delete this inventory item?')) {
+            inventory = inventory.filter(x=> x.id !== id)
+            renderInventory(); refreshProductList()
+          }
+        })
+      })
+      refreshProductList()
+    }
+
+    function createRow(index){
+      const tr = document.createElement('tr')
+      tr.innerHTML = `
+        <td class="sr">${index}</td>
+        <td>
+          <input list="productList" type="text" class="inp name" placeholder="Product / Packing" />
+          <div class="small muted ava" style="font-size:11px"></div>
+        </td>
+        <td><input type="text" class="inp hsn" style="width:60px" /></td>
+        <td><input type="text" class="inp batch" style="width:70px" /></td>
+        <td><input type="text" class="inp expiry" placeholder="MM/YYYY" style="width:120px" /></td>
+        <td><input type="number" min="0" step="0.01" value="0" class="inp mrp" style="width:60px" /></td>
+        <td><input type="number" min="0" step="0.01" value="0" class="inp rate" style="width:60px" /></td>
+        <td><input type="number" min="1" value="1" class="inp unitsPerPack" style="width:60px" /></td>
+        <td><input type="number" min="0" value="1" class="inp qty" style="width:60px" /></td>
+        <td>
+          <select class="inp gst">
+            <option value="0" selected>0%</option>
+            <option value="5">5%</option>
+            <option value="12">12%</option>
+            <option value="18">18%</option>
+            <option value="28">28%</option>
+          </select>
+        </td>
+        <td class="right amountCell">0.00</td>
+        <td class="no-print"><button class="delete-btn">×</button></td>
+      `
+      const nameInput = tr.querySelector('.name')
+      const hsnInput = tr.querySelector('.hsn')
+      const batchInput = tr.querySelector('.batch')
+      const expiryInput = tr.querySelector('.expiry')
+      const mrpInput = tr.querySelector('.mrp')
+      const rateInput = tr.querySelector('.rate')
+      const unitsPerPackInput = tr.querySelector('.unitsPerPack')
+      const qtyInput = tr.querySelector('.qty')
+      const gstSelect = tr.querySelector('.gst')
+      const avaDiv = tr.querySelector('.ava')
+
+      function showAvailabilityForName(){
+        const nm = nameInput.value.trim()
+        if(!nm){ avaDiv.textContent = ''; return }
+        const matches = inventory.filter(i => i.name === nm)
+        if(matches.length===0){ avaDiv.textContent = 'Not in inventory'; return }
+        const totalUnits = matches.reduce((s,m)=> s + Number(m.qtyUnits||0),0)
+        avaDiv.textContent = `In stock: ${totalUnits} units`
+      }
+
+      nameInput.addEventListener('change', ()=>{
+        const nm = nameInput.value.trim()
+        if(!nm) return
+        const match = inventory.find(i => i.name === nm)
+        if(match){
+          hsnInput.value = match.hsn || ''
+          batchInput.value = match.batch || ''
+          expiryInput.value = match.expiry || ''
+          mrpInput.value = Number(match.mrp||0).toFixed(2)
+          rateInput.value = Number(match.rate||0).toFixed(2)
+          unitsPerPackInput.value = match.unitsPerPack || 1
+          gstSelect.value = match.gst != null ? String(match.gst) : '0'
+          showAvailabilityForName()
+        } else {
+          hsnInput.value = ''
+          avaDiv.textContent = 'Not in inventory'
+        }
+        calculateTotals()
+      })
+
+      batchInput.addEventListener('change', ()=>{
+        const nm = nameInput.value.trim()
+        const batch = batchInput.value.trim()
+        if(!nm || !batch) return
+        const match = inventory.find(i => i.name === nm && i.batch === batch)
+        if(match){
+          hsnInput.value = match.hsn || ''
+          expiryInput.value = match.expiry || ''
+          mrpInput.value = Number(match.mrp||0).toFixed(2)
+          rateInput.value = Number(match.rate||0).toFixed(2)
+          unitsPerPackInput.value = match.unitsPerPack || 1
+          gstSelect.value = match.gst != null ? String(match.gst) : '0'
+        }
+        showAvailabilityForName()
+        calculateTotals()
+      })
+
+      qtyInput.addEventListener('input', ()=>{
+        const nm = nameInput.value.trim()
+        const batch = batchInput.value.trim()
+        const qUnits = Number(qtyInput.value) || 0
+        if(nm){
+          let availableUnits = 0
+          if(batch){
+            const stock = inventory.find(i => i.name === nm && i.batch === batch)
+            if(stock) availableUnits = Number(stock.qtyUnits||0)
+          } else {
+            availableUnits = inventory.filter(i => i.name === nm).reduce((s,m)=> s + Number(m.qtyUnits||0),0)
+          }
+          if(qUnits > availableUnits){
+            qtyInput.style.border = '1px solid #b91c1c'
+            avaDiv.textContent = `In stock: ${availableUnits} units — Qty exceeds!`
+          } else {
+            qtyInput.style.border = ''
+            showAvailabilityForName()
+          }
+        }
+        calculateTotals()
+      })
+
+      tr.querySelector('.delete-btn').addEventListener('click', ()=>{ tr.remove(); refreshSerials(); calculateTotals() })
+      tr.querySelectorAll('.inp').forEach(inp => inp.addEventListener('input', calculateTotals))
+
+      return tr
+    }
+
+    function refreshSerials(){ Array.from(tbody.querySelectorAll('tr')).forEach((tr,i)=> tr.querySelector('.sr').textContent = i+1) }
+    function addRow(){ const idx = tbody.querySelectorAll('tr').length + 1; tbody.appendChild(createRow(idx)) }
+
+    function clearAll(){
+      tbody.innerHTML = ''
+      addRow()
+      patientNameInput.value = ''
+      patientAddressInput.value = ''
+      doctorNameInput.value = ''
+      mobileNoInput.value = ''
+      document.getElementById('invoiceNo').value = ''
+      sigDateInput.value = (new Date()).toISOString().slice(0,10)
+      discountPctInput.value = 0
+      updateDisplayHeaders()
+      calculateTotals()
+      afterSubmitButtons.style.display = 'none'
+      submitBtn.style.display = 'inline-block'
+      invoiceSubmitted = false
+      setInvoiceStatus('new')
+    }
+
+    function readInvoiceFromUI(){
+      const rows = Array.from(tbody.querySelectorAll('tr'))
+      const items = rows.map(tr=>({
+        sr: tr.querySelector('.sr').textContent,
+        name: tr.querySelector('.name').value,
+        hsn: tr.querySelector('.hsn').value,
+        batch: tr.querySelector('.batch').value,
+        expiry: tr.querySelector('.expiry').value,
+        mrpPerPack: tr.querySelector('.mrp').value,
+        ratePerPack: tr.querySelector('.rate').value,
+        unitsPerPack: tr.querySelector('.unitsPerPack').value,
+        qtyUnits: tr.querySelector('.qty').value, // qty is in units
+        gst: tr.querySelector('.gst').value,
+        amount: tr.querySelector('.amountCell').textContent
+      }))
+
+      return {
+        shop: 'SHYAM JI MEDICOSE (PARK)',
+        invoiceNo: 'INV-' + (document.getElementById('invoiceNo').value || ''),
+        patient: patientNameInput.value || '',
+        patientAddress: patientAddressInput.value || '',
+        doctor: doctorNameInput.value || '',
+        mobile: mobileNoInput.value || '',
+        invoiceDate: document.getElementById('sigDate').value || '',
+        pricesIncludeGst: !!pricesIncludeGstChk.checked,
+        discountPct: Number(discountPctInput.value) || 0,
+        items,
+        totals: {
+          subtotal: document.getElementById('subtotal').textContent,
+          totalGst: document.getElementById('totalGst').textContent,
+          grandTotal: document.getElementById('grandTotal').textContent,
+          discountAmount: document.getElementById('discountAmount').textContent,
+          finalTotal: document.getElementById('finalTotal').textContent
+        }
+      }
+    }
+
+    const discountPctInput = document.getElementById('discountPct')
+
+    async function calculateTotals(){
+      let subtotal = 0; let totalGst = 0
+      const includeGst = !!pricesIncludeGstChk.checked
+      Array.from(tbody.querySelectorAll('tr')).forEach(tr=>{
+        const qtyUnits = parseFloat(tr.querySelector('.qty').value) || 0
+        const ratePerPack = parseFloat(tr.querySelector('.rate').value) || 0
+        const unitsPerPack = parseFloat(tr.querySelector('.unitsPerPack').value) || 1
+        const gst = parseFloat(tr.querySelector('.gst').value) || 0
+
+        const effectiveRate = unitsPerPack ? (ratePerPack / unitsPerPack) : ratePerPack
+
+        let baseAmountPerUnit = effectiveRate
+        let gstAmtPerUnit = 0
+        if(includeGst){
+          baseAmountPerUnit = effectiveRate / (1 + gst/100)
+          gstAmtPerUnit = effectiveRate - baseAmountPerUnit
+        } else {
+          gstAmtPerUnit = effectiveRate * gst/100
+        }
+
+        const amount = qtyUnits * baseAmountPerUnit
+        const gstAmt = qtyUnits * gstAmtPerUnit
+        const rowTotal = amount + gstAmt
+        tr.querySelector('.amountCell').textContent = rowTotal.toFixed(2)
+
+        subtotal += amount
+        totalGst += gstAmt
+      })
+      const grand = subtotal + totalGst
+
+      const discountPct = Number(discountPctInput.value) || 0
+      const discountAmount = (grand * discountPct) / 100
+      const finalTotal = grand - discountAmount
+
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2)
+      document.getElementById('totalGst').textContent = totalGst.toFixed(2)
+      document.getElementById('grandTotal').textContent = grand.toFixed(2)
+      document.getElementById('discountAmount').textContent = discountAmount.toFixed(2)
+      document.getElementById('finalTotal').textContent = finalTotal.toFixed(2)
+
+      updateDisplayHeaders(); calculateChange()
+    }
+
+    function updateDisplayHeaders(){
+      patientDisplay.textContent = patientNameInput.value || '-'
+      patientAddressDisplay.textContent = patientAddressInput.value || '-'
+      doctorDisplay.textContent = doctorNameInput.value || '-'
+    }
+
+    function calculateChange(){ const cash = parseFloat(cashReceivedInput.value) || 0; const finalTotal = parseFloat(document.getElementById('finalTotal').textContent) || 0; const change = cash - finalTotal; changeReturn.textContent = change.toFixed(2) }
+
+    async function saveInvoice(){
+      const data = readInvoiceFromUI()
+      const filename = `${data.invoiceNo || 'invoice' }.json`
+      const text = JSON.stringify(data, null, 2)
+
+      if(directoryHandle){
+        try{
+          const fileHandle = await directoryHandle.getFileHandle(filename, { create: true })
+          const writable = await fileHandle.createWritable()
+          await writable.write(text)
+          await writable.close()
+          return { saved: true, method: 'folder', filename }
+        }catch(err){ console.error(err) }
+      }
+
+      const blob = new Blob([text], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove()
+      URL.revokeObjectURL(url)
+      return { saved: true, method: 'download', filename }
+    }
+
+    async function pickDirectory(){
+      if(!window.showDirectoryPicker){ alert('Your browser does not support directory access. Use Chrome/Edge or use Upload Files button to upload saved JSONs.') ; return }
+      try{
+        directoryHandle = await window.showDirectoryPicker()
+        alert('Folder selected. You can now Save invoices directly into this folder.')
+        checkInvoiceExists()
+      }catch(err){ console.error(err) }
+    }
+
+    async function searchInvoices(){
+      const results = []
+      const from = document.getElementById('searchFrom').value
+      const to = document.getElementById('searchTo').value
+      const nameQ = document.getElementById('searchName').value.trim().toLowerCase()
+      const mobileQ = document.getElementById('searchMobile').value.trim()
+
+      const processText = (text)=>{
+        try{
+          const obj = JSON.parse(text)
+          let ok = true
+          if(nameQ && !(obj.patient || '').toLowerCase().includes(nameQ)) ok = false
+          if(mobileQ && !(obj.mobile || '').includes(mobileQ)) ok = false
+          if(from){ const d = obj.invoiceDate || ''; if(!d || d < from) ok = false }
+          if(to){ const d = obj.invoiceDate || ''; if(!d || d > to) ok = false }
+          if(ok) results.push(obj)
+        }catch(e){ console.warn('invalid json') }
+      }
+
+      if(directoryHandle){
+        for await (const entry of directoryHandle.values()){
+          if(entry.kind === 'file' && entry.name.toLowerCase().endsWith('.json')){
+            try{
+              const fh = await directoryHandle.getFileHandle(entry.name)
+              const fileData = await fh.getFile()
+              const text = await fileData.text()
+              processText(text)
+            }catch(err){ console.error(err) }
+          }
+        }
+      }
+
+      const files = Array.from(fileInput.files || [])
+      for(const f of files){ try{ const txt = await f.text(); processText(txt) }catch(e){console.error(e)} }
+
+      searchResults.innerHTML = ''
+      if(results.length===0){ searchResults.textContent = 'No matching invoices found.'; return }
+      results.forEach(r=>{
+        const d = document.createElement('div')
+        d.style.borderTop = '1px solid #eee'; d.style.padding = '8px 0'
+        d.innerHTML = `<strong>${r.invoiceNo}</strong> — ${r.patient || r.customer || '-'} — ${r.mobile || '-'} — <em>${r.invoiceDate}</em> — <strong>Total: ${r.totals?.finalTotal || '-'}</strong> <button data-inv='${encodeURIComponent(JSON.stringify(r))}'>Load</button>`
+        const btn = d.querySelector('button')
+        btn.addEventListener('click', ()=> {
+          const obj = JSON.parse(decodeURIComponent(btn.getAttribute('data-inv')))
+          loadInvoiceToUI(obj)
+        })
+        searchResults.appendChild(d)
+      })
+    }
+
+    function loadInvoiceToUI(obj){
+      tbody.innerHTML = ''
+      document.getElementById('invoiceNo').value = (obj.invoiceNo||'').replace(/^INV-?/,'')
+      patientNameInput.value = obj.patient || obj.customer || ''
+      patientAddressInput.value = obj.patientAddress || ''
+      doctorNameInput.value = obj.doctor || ''
+      mobileNoInput.value = obj.mobile || ''
+      document.getElementById('sigDate').value = obj.invoiceDate || ''
+      if(typeof obj.pricesIncludeGst !== 'undefined') pricesIncludeGstChk.checked = !!obj.pricesIncludeGst
+      discountPctInput.value = obj.discountPct != null ? obj.discountPct : 0
+
+      (obj.items || []).forEach((it, i)=>{
+        const tr = createRow(i+1)
+        tr.querySelector('.name').value = it.name || ''
+        tr.querySelector('.hsn').value = it.hsn || ''
+        tr.querySelector('.batch').value = it.batch || ''
+        tr.querySelector('.expiry').value = it.expiry || ''
+        tr.querySelector('.mrp').value = it.mrpPerPack || 0
+        tr.querySelector('.rate').value = it.ratePerPack || 0
+        tr.querySelector('.unitsPerPack').value = it.unitsPerPack || 1
+        tr.querySelector('.qty').value = it.qtyUnits || 0
+        tr.querySelector('.gst').value = it.gst || 0
+        tbody.appendChild(tr)
+      })
+      refreshSerials(); calculateTotals(); alert('Invoice loaded into form')
+    }
+
+    function reduceStockFromInvoice(items){
+      const warnings = []
+      items.forEach(invItem=>{
+        const name = invItem.name
+        const batch = invItem.batch
+        let need = Number(invItem.qtyUnits) || 0
+        if(!name || need <= 0) return
+
+        if(batch){
+          const stock = inventory.find(i => i.name === name && i.batch === batch)
+          if(stock){
+            if(stock.qtyUnits >= need){ stock.qtyUnits = Number(stock.qtyUnits) - need; need = 0 }
+            else { warnings.push(`${name} (batch ${batch}) available ${stock.qtyUnits} units, required ${invItem.qtyUnits}`); need -= stock.qtyUnits; stock.qtyUnits = 0 }
+          } else {
+            warnings.push(`No stock found for ${name} (batch ${batch})`)
+          }
+          if(need > 0){
+            const others = inventory.filter(i => i.name === name && i.batch !== batch).sort((a,b)=> parseExpiry(a.expiry) - parseExpiry(b.expiry))
+            for(const o of others){
+              if(need <= 0) break
+              const take = Math.min(need, o.qtyUnits)
+              o.qtyUnits = Number(o.qtyUnits) - take
+              need -= take
+            }
+          }
+          if(need > 0) warnings.push(`${name}: ${need} unit(s) could not be fulfilled.`)
+        } else {
+          const batches = inventory.filter(i => i.name === name).sort((a,b)=> parseExpiry(a.expiry) - parseExpiry(b.expiry))
+          let remaining = need
+          for(const bItem of batches){
+            if(remaining <= 0) break
+            const take = Math.min(remaining, Number(bItem.qtyUnits||0))
+            bItem.qtyUnits = Number(bItem.qtyUnits||0) - take
+            remaining -= take
+          }
+          if(remaining > 0) warnings.push(`${name}: ${remaining} unit(s) could not be fulfilled.`)
+        }
+      })
+      renderInventory()
+      return warnings
+    }
+
+    function parseExpiry(exp){
+      if(!exp) return 1e18
+      const parts = exp.split('/')
+      if(parts.length !== 2) return 1e18
+      const mm = Number(parts[0]), yy = Number(parts[1])
+      if(isNaN(mm) || isNaN(yy)) return 1e18
+      return new Date(yy, mm-1).getTime()
+    }
+
+    // inventory modal handlers (same as before)
+    let editingInvId = null
+    addInventoryBtn.addEventListener('click', ()=> openInvModalForEdit(null))
+
+    function openInvModalForEdit(id){
+      editingInvId = id
+      const fld = (id ? inventory.find(x=>x.id===id) : null) || {}
+      document.getElementById('inv_name').value = fld.name || ''
+      document.getElementById('inv_hsn').value = fld.hsn || ''
+      document.getElementById('inv_batch').value = fld.batch || ''
+      document.getElementById('inv_expiry').value = fld.expiry || ''
+      document.getElementById('inv_mrp').value = fld.mrp || ''
+      document.getElementById('inv_rate').value = fld.rate || ''
+      document.getElementById('inv_unitsPerPack').value = fld.unitsPerPack || 1
+      const packs = fld.unitsPerPack ? ( (fld.qtyUnits || 0) / (fld.unitsPerPack || 1) ) : (fld.qtyUnits || 0)
+      document.getElementById('inv_packs').value = packs || 0
+      document.getElementById('inv_gst').value = fld.gst || ''
+      inventoryModal.style.display = 'flex'
+    }
+
+    invCancelBtn.addEventListener('click', ()=> { inventoryModal.style.display='none'; editingInvId = null })
+
+    invSaveBtn.addEventListener('click', ()=>{
+      const name = document.getElementById('inv_name').value.trim()
+      if(!name){ alert('Product name required'); return }
+      const packs = Number(document.getElementById('inv_packs').value) || 0
+      const unitsPerPack = Number(document.getElementById('inv_unitsPerPack').value) || 1
+      const totalUnits = packs * unitsPerPack
+      const obj = {
+        id: editingInvId || genId(),
+        name,
+        hsn: document.getElementById('inv_hsn').value.trim(),
+        batch: document.getElementById('inv_batch').value.trim(),
+        expiry: document.getElementById('inv_expiry').value.trim(),
+        mrp: Number(document.getElementById('inv_mrp').value) || 0,
+        rate: Number(document.getElementById('inv_rate').value) || 0,
+        gst: Number(document.getElementById('inv_gst').value) || 0,
+        unitsPerPack: unitsPerPack || 1,
+        qtyUnits: Number(totalUnits) || 0
+      }
+      if(editingInvId){
+        inventory = inventory.map(i => i.id === editingInvId ? obj : i)
+      } else {
+        inventory.push(obj)
+      }
+      editingInvId = null
+      inventoryModal.style.display = 'none'
+      renderInventory()
+    })
+
+    // import / export inventory
+    exportInvBtn.addEventListener('click', ()=>{
+      const filename = 'inventory.json'
+      const blob = new Blob([JSON.stringify(inventory, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove()
+      URL.revokeObjectURL(url)
+    })
+    importInvBtn.addEventListener('click', ()=> invFileInput.click())
+    invFileInput.addEventListener('change', async ()=>{
+      const f = invFileInput.files[0]; if(!f) return
+      try{
+        const txt = await f.text()
+        const arr = JSON.parse(txt)
+        if(Array.isArray(arr)){
+          arr.forEach(it => { if(!it.id) it.id = genId(); if(!it.qtyUnits){
+            if(it.packs && it.unitsPerPack) it.qtyUnits = Number(it.packs) * Number(it.unitsPerPack)
+            else it.qtyUnits = Number(it.qtyUnits) || 0
+          }})
+          inventory = inventory.concat(arr)
+          renderInventory(); alert('Inventory imported. Review table for duplicates.')
+        } else alert('Invalid inventory file (expected array)')
+      }catch(e){ alert('Error reading file: '+e.message) }
+      invFileInput.value = ''
+    })
+
+    // submit invoice
+    submitBtn.addEventListener('click', async ()=>{
+      await calculateTotals()
+      const invNo = document.getElementById('invoiceNo').value.trim()
+      const firstRow = tbody.querySelector('tr')
+      const firstProduct = firstRow ? firstRow.querySelector('.name').value.trim() : ''
+      if(!invNo){ alert('Please enter Invoice number (the numeric part).'); return }
+      if(!firstProduct){ if(!confirm('First product name is empty. Submit anyway?')) return }
+
+      const items = Array.from(tbody.querySelectorAll('tr')).map(tr=>({
+        name: tr.querySelector('.name').value.trim(),
+        batch: tr.querySelector('.batch').value.trim(),
+        qtyUnits: Number(tr.querySelector('.qty').value) || 0
+      })).filter(i=> i.name && i.qtyUnits>0)
+
+      const shortages = []
+      items.forEach(it=>{
+        if(it.batch){
+          const stock = inventory.find(x => x.name === it.name && x.batch === it.batch)
+          const avail = stock ? Number(stock.qtyUnits||0) : 0
+          if(it.qtyUnits > avail) shortages.push(`${it.name} (batch ${it.batch}) available ${avail} units, required ${it.qtyUnits}`)
+        } else {
+          const avail = inventory.filter(x => x.name === it.name).reduce((s,m)=> s + Number(m.qtyUnits||0),0)
+          if(it.qtyUnits > avail) shortages.push(`${it.name} total available ${avail} units, required ${it.qtyUnits}`)
+        }
+      })
+
+      if(shortages.length){
+        if(!confirm('Some items exceed stock:\n' + shortages.join('\n') + '\n\nSubmit anyway? (If you proceed, remaining units will be left unfulfilled)')) {
+          return
+        }
+      }
+
+      const warnings = reduceStockFromInvoice(items)
+      if(warnings.length) alert('Warnings:\n'+warnings.join('\n'))
+
+      invoiceSubmitted = true
+      submitBtn.textContent = 'Submitting...'
+      submitBtn.disabled = true
+
+      try{
+        const res = await saveInvoice()
+        if(res && res.saved){
+          if(res.method === 'folder') alert('Invoice saved to selected folder as ' + res.filename)
+          else alert('Invoice downloaded as ' + res.filename)
+        } else {
+          alert('Invoice saved.')
+        }
+      }catch(err){
+        console.error('Save failed', err)
+        alert('Invoice submit succeeded but auto-save failed. You can click Save to retry.')
+      }
+
+      submitBtn.textContent = 'Submitted'
+      afterSubmitButtons.style.display = 'block'
+      alert('Invoice submitted — stock updated. You can now Share or Print/Save PDF.')
+    })
+
+    // share & print
+    function shareInvoice(){
+      if(!invoiceSubmitted){ alert('Please submit the invoice first.'); return }
+      calculateTotals()
+      const invoiceText = `Invoice No: INV-${document.getElementById('invoiceNo').value}
+Patient: ${patientNameInput.value}
+Total: ${document.getElementById('finalTotal').textContent}`
+      const url = `https://wa.me/?text=${encodeURIComponent(invoiceText)}`
+      window.open(url, '_blank')
+    }
+    shareBtn.addEventListener('click', shareInvoice)
+    document.getElementById('shareBtn2')?.addEventListener('click', shareInvoice)
+    document.getElementById('printBtn')?.addEventListener('click', ()=>{ if(!invoiceSubmitted){ alert('Please submit the invoice first.'); return } calculateTotals(); window.print() })
+    document.getElementById('printBtn2')?.addEventListener('click', ()=>{ if(!invoiceSubmitted){ alert('Please submit the invoice first.'); return } calculateTotals(); window.print() })
+
+    cashReceivedInput.addEventListener('input', calculateChange)
+    pricesIncludeGstChk.addEventListener('change', calculateTotals)
+    discountPctInput.addEventListener('input', calculateTotals)
+    patientNameInput.addEventListener('input', updateDisplayHeaders)
+    patientAddressInput.addEventListener('input', updateDisplayHeaders)
+    doctorNameInput.addEventListener('input', updateDisplayHeaders)
+
+    function setInvoiceStatus(kind){
+      invoiceStatusSpan.classList.remove('exists','new')
+      invoiceStatusSpan.classList.add(kind === 'exists' ? 'exists' : 'new')
+      invoiceStatusSpan.textContent = kind === 'exists' ? 'Exists' : 'New'
+    }
+
+    async function checkInvoiceExists(){
+      const no = (invoiceNoInput.value || '').trim()
+      if(!no){ setInvoiceStatus('new'); return }
+      const filenameCandidates = [
+        `INV-${no}.json`, `INV-${no}`, `${no}.json`, `invoice-${no}.json`, `invoice-${no}`
+      ].map(s => s.toLowerCase())
+
+      for(const f of Array.from(fileInput.files || [])){
+        if(filenameCandidates.includes(f.name.toLowerCase())){ setInvoiceStatus('exists'); return }
+        try{
+          const txt = await f.text()
+          if(txt.includes(`"invoiceNo"`) && txt.toLowerCase().includes(`inv-${no.toLowerCase()}`)){ setInvoiceStatus('exists'); return }
+        }catch(e){}
+      }
+
+      if(directoryHandle){
+        try{
+          for await (const entry of directoryHandle.values()){
+            if(entry.kind === 'file'){
+              const n = entry.name.toLowerCase()
+              if(filenameCandidates.includes(n)){ setInvoiceStatus('exists'); return }
+            }
+          }
+        }catch(e){ console.warn(e) }
+      }
+
+      setInvoiceStatus('new')
+    }
+    invoiceNoInput.addEventListener('input', ()=> { checkInvoiceExists() })
+
+    addRowBtn.addEventListener('click', ()=>{ addRow(); refreshSerials() })
+    clearBtn.addEventListener('click', ()=>{ if(confirm('Clear invoice and fields?')) clearAll() })
+    saveBtn.addEventListener('click', ()=>{ calculateTotals(); saveInvoice().then(r=>{ if(r && r.saved) alert('Saved: '+r.filename) }) })
+    pickDirBtn.addEventListener('click', pickDirectory)
+    uploadBtn.addEventListener('click', ()=> fileInput.click())
+    fileInput.addEventListener('change', ()=> { searchResults.textContent = fileInput.files.length + ' file(s) selected'; checkInvoiceExists() })
+    searchBtn.addEventListener('click', searchInvoices)
+
+    inventoryTableBody.addEventListener('dblclick', (e)=>{
+      const tr = e.target.closest('tr')
+      if(!tr) return
+      const name = tr.children[0].textContent
+      const idx = tbody.querySelectorAll('tr').length + 1
+      const row = createRow(idx)
+      row.querySelector('.name').value = name
+      const inv = inventory.find(i => i.name === name)
+      if(inv){
+        row.querySelector('.hsn').value = inv.hsn || ''
+        row.querySelector('.batch').value = inv.batch || ''
+        row.querySelector('.expiry').value = inv.expiry || ''
+        row.querySelector('.mrp').value = Number(inv.mrp||0).toFixed(2)
+        row.querySelector('.rate').value = Number(inv.rate||0).toFixed(2)
+        row.querySelector('.unitsPerPack').value = inv.unitsPerPack || 1
+        row.querySelector('.qty').value = inv.unitsPerPack || 1
+      }
+      tbody.appendChild(row)
+      calculateTotals()
+    })
+
+    // init
+    addRow(); calculateTotals()
+    renderInventory()
+    sigDateInput.value = (new Date()).toISOString().slice(0,10)
+    setInvoiceStatus('new')
+  </script>
+</body>
+</html>

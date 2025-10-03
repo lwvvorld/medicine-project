@@ -1,0 +1,8 @@
+{
+  "name": "shyam-invoice-api",
+  "version": "1.0.0",
+  "dependencies": {
+    "@octokit/rest": "^19.0.0",
+    "micro": "^9.3.4"
+  }
+}
