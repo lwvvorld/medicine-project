@@ -326,8 +326,8 @@
 
     function genId(){ return 'id'+Math.random().toString(36).slice(2,9) }
 
-    // inventory stores units (smallest unit)
-    let inventory = [
+    // --- DEFAULT INVENTORY (kept as fallback)
+    const defaultInventory = [
   {id: genId(), name:"Paracetamol Strip", hsn:"300450", batch:"P001", expiry:"08/2026", mrp:210, rate:200, gst:0, unitsPerPack:10, qtyUnits:96000},
   {id: genId(), name:"Cough Syrup 100ml", hsn:"300490", batch:"C002", expiry:"12/2025", mrp:85, rate:72, gst:12, unitsPerPack:1, qtyUnits:5760},
   {id: genId(), name:"CAP-CAYLIX MAX", hsn:"3004", batch:"DBS-1555", expiry:"05/2027", mrp:310, rate:310, gst:0, unitsPerPack:10, qtyUnits:16000},
@@ -345,6 +345,23 @@
   {id: genId(), name:"INJ-MAGNEON 2ML (NEON)", hsn:"3004", batch:"70211", expiry:"12/2026", mrp:11.05, rate:11.05, gst:0, unitsPerPack:1, qtyUnits:2000},
   {id: genId(), name:"TAB-MAGNETOR (STPL)", hsn:"3004", batch:"25B02", expiry:"12/2026", mrp:48.47, rate:48.47, gst:0, unitsPerPack:10, qtyUnits:500}
 ]
+
+    // load inventory from localStorage (persist across refresh)
+    let inventory = (function(){
+      try {
+        const raw = localStorage.getItem('sjm_inventory_v1')
+        if(raw){
+          const parsed = JSON.parse(raw)
+          parsed.forEach(it=>{ if(!it.id) it.id = genId() })
+          return parsed
+        }
+      }catch(e){ console.warn('localStorage read error', e) }
+      return defaultInventory.slice()
+    })()
+
+    function persistInventory(){
+      try{ localStorage.setItem('sjm_inventory_v1', JSON.stringify(inventory)) }catch(e){ console.warn('persist failed', e) }
+    }
 
     function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 
@@ -391,6 +408,7 @@
           if(confirm('Delete this inventory item?')) {
             inventory = inventory.filter(x=> x.id !== id)
             renderInventory(); refreshProductList()
+            persistInventory()
           }
         })
       })
@@ -769,6 +787,7 @@
         }
       })
       renderInventory()
+      persistInventory() // <- save after stock reduction
       return warnings
     }
 
@@ -829,6 +848,7 @@
       editingInvId = null
       inventoryModal.style.display = 'none'
       renderInventory()
+      persistInventory() // <- save after add/edit
     })
 
     // import / export inventory
@@ -851,6 +871,7 @@
             else it.qtyUnits = Number(it.qtyUnits) || 0
           }})
           inventory = inventory.concat(arr)
+          persistInventory() // <- save after import
           renderInventory(); alert('Inventory imported. Review table for duplicates.')
         } else alert('Invalid inventory file (expected array)')
       }catch(e){ alert('Error reading file: '+e.message) }
@@ -909,6 +930,12 @@
         console.error('Save failed', err)
         alert('Invoice submit succeeded but auto-save failed. You can click Save to retry.')
       }
+
+      // try to post to serverless API (non-blocking)
+      postInvoiceToServer(readInvoiceFromUI()).then(r=>{
+        if(r && r.savedToGitHub) alert('Invoice also saved to GitHub: ' + r.path)
+        else if(r && r.error) console.warn('Server save error', r)
+      }).catch(e=> console.warn('postInvoiceToServer error', e))
 
       submitBtn.textContent = 'Submitted'
       afterSubmitButtons.style.display = 'block'
@@ -1002,6 +1029,21 @@ Total: ${document.getElementById('finalTotal').textContent}`
       calculateTotals()
     })
 
+    // --- POST invoice to serverless function (non-blocking)
+    async function postInvoiceToServer(data){
+      try{
+        const url = '/api/save-invoice'
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        })
+        const j = await resp.json().catch(()=>null)
+        if(resp.ok) return j
+        return { error: 'server failure', details: j }
+      }catch(e){ console.warn('postInvoiceToServer error', e); return { error: e.message } }
+    }
+
     // init
     addRow(); calculateTotals()
     renderInventory()
@@ -1010,5 +1052,3 @@ Total: ${document.getElementById('finalTotal').textContent}`
   </script>
 </body>
 </html>
-
-
