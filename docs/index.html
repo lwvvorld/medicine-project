@@ -326,25 +326,13 @@
 
     function genId(){ return 'id'+Math.random().toString(36).slice(2,9) }
 
-    // --- DEFAULT INVENTORY (kept as fallback)
+    // --- DEFAULT INVENTORY (kept as fallback) ---
     const defaultInventory = [
-  {id: genId(), name:"Paracetamol Strip", hsn:"300450", batch:"P001", expiry:"08/2026", mrp:210, rate:200, gst:0, unitsPerPack:10, qtyUnits:96000},
-  {id: genId(), name:"Cough Syrup 100ml", hsn:"300490", batch:"C002", expiry:"12/2025", mrp:85, rate:72, gst:12, unitsPerPack:1, qtyUnits:5760},
-  {id: genId(), name:"CAP-CAYLIX MAX", hsn:"3004", batch:"DBS-1555", expiry:"05/2027", mrp:310, rate:310, gst:0, unitsPerPack:10, qtyUnits:16000},
-  {id: genId(), name:"CLOPITEX-A 75 TAB", hsn:"3005", batch:"PBQGD03", expiry:"11/2026", mrp:95, rate:33, gst:12, unitsPerPack:1, qtyUnits:0},
-  {id: genId(), name:"LINAGLYS-5 TAB", hsn:"3004", batch:"I3754001", expiry:"12/2025", mrp:110, rate:11, gst:12, unitsPerPack:1, qtyUnits:0},
-  {id: genId(), name:"MENSTAROL 200ML(syrup)", hsn:"3004", batch:"LMST2403", expiry:"09/2027", mrp:176, rate:176, gst:12, unitsPerPack:2, qtyUnits:0},
-  {id: genId(), name:"AMLIP10 TAB", hsn:"3004", batch:"4C10140", expiry:"01/2027", mrp:61.04, rate:10.5, gst:18, unitsPerPack:10, qtyUnits:0},
-  {id: genId(), name:"TAB-TRIPMAX-PLUS", hsn:"3004", batch:"MTT250171", expiry:"12/2026", mrp:225, rate:225, gst:12, unitsPerPack:50, qtyUnits:0},
-  {id: genId(), name:"INJ- GMINE PLUS", hsn:"3004", batch:"14MB2CID", expiry:"11/2025", mrp:190, rate:190, gst:18, unitsPerPack:5, qtyUnits:0},
-  {id: genId(), name:"TAB-SPINO HEAL", hsn:"2106", batch:"TMY-337", expiry:"04/2027", mrp:381, rate:381, gst:18, unitsPerPack:50, qtyUnits:0},
-  {id: genId(), name:"CREDRID GEL 30GM", hsn:"3004", batch:"B2421B", expiry:"01/2026", mrp:110, rate:110, gst:12, unitsPerPack:5, qtyUnits:0},
-  {id: genId(), name:"TAB-CITIBEST-P", hsn:"3004", batch:"ADT24266A", expiry:"06/2026", mrp:818, rate:818, gst:0, unitsPerPack:10, qtyUnits:3200},
-  {id: genId(), name:"TAB-NITRONEED-SR", hsn:"3004", batch:"LGP01/298/16", expiry:"12/2026", mrp:126, rate:126, gst:0, unitsPerPack:10, qtyUnits:4000},
-  {id: genId(), name:"TAB-TELCOSURE-M25", hsn:"3004", batch:"LGN09/065/15", expiry:"08/2026", mrp:137, rate:137, gst:0, unitsPerPack:10, qtyUnits:4000},
-  {id: genId(), name:"INJ-MAGNEON 2ML (NEON)", hsn:"3004", batch:"70211", expiry:"12/2026", mrp:11.05, rate:11.05, gst:0, unitsPerPack:1, qtyUnits:2000},
-  {id: genId(), name:"TAB-MAGNETOR (STPL)", hsn:"3004", batch:"25B02", expiry:"12/2026", mrp:48.47, rate:48.47, gst:0, unitsPerPack:10, qtyUnits:500}
-]
+      {id: genId(), name:"Paracetamol Strip", hsn:"300450", batch:"P001", expiry:"08/2026", mrp:210, rate:200, gst:0, unitsPerPack:10, qtyUnits:96000},
+      {id: genId(), name:"Cough Syrup 100ml", hsn:"300490", batch:"C002", expiry:"12/2025", mrp:85, rate:72, gst:12, unitsPerPack:1, qtyUnits:5760},
+      {id: genId(), name:"CAP-CAYLIX MAX", hsn:"3004", batch:"DBS-1555", expiry:"05/2027", mrp:310, rate:310, gst:0, unitsPerPack:10, qtyUnits:16000},
+      {id: genId(), name:"TAB-CITIBEST-P", hsn:"3004", batch:"ADT24266A", expiry:"06/2026", mrp:818, rate:818, gst:0, unitsPerPack:10, qtyUnits:3200}
+    ]
 
     // load inventory from localStorage (persist across refresh)
     let inventory = (function(){
@@ -1052,3 +1040,4 @@ Total: ${document.getElementById('finalTotal').textContent}`
   </script>
 </body>
 </html>
+
